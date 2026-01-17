@@ -5,6 +5,7 @@ public:
 
   Matrix(Matrix &&obj);
   void T();
+  Matrix T_C();
 
   Matrix &operator=(Matrix &&obj);
   ~Matrix();
@@ -18,6 +19,9 @@ public:
   void print() const;
   int numel() const;
   void shape() const;
+  Matrix scale(float x);
+
+  Matrix sum_dim_0();
 
 private:
   int rows_;
@@ -29,7 +33,10 @@ private:
 };
 
 void fill(Matrix &a, float x);
-Matrix &add(Matrix &out, const Matrix &a, const Matrix &b);
-Matrix &sub(Matrix &out, const Matrix &a, const Matrix &b);
-Matrix &matmul(Matrix &out, const Matrix &a, const Matrix &b);
-void relu(Matrix &a);
+Matrix add(const Matrix &a, const Matrix &b);
+Matrix sub(const Matrix &a, const Matrix &b);
+Matrix matmul(const Matrix &a, const Matrix &b);
+Matrix broadcast_add(const Matrix &a, const Matrix &b);
+Matrix &relu(Matrix &a);
+Matrix d_relu(Matrix a);
+Matrix hammard_product(const Matrix &a, const Matrix &b);

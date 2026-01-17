@@ -44,8 +44,15 @@ Matrix::Matrix(Matrix &&obj) {
   obj.data = nullptr;
 }
 void Matrix::T() {
+
   std::swap(rows_, cols_);
   std::swap(row_stride, col_stride);
+}
+Matrix Matrix::T_C() {
+  Matrix copy = *this;
+  std::swap(copy.rows_, copy.cols_);
+  std::swap(copy.row_stride, copy.col_stride);
+  return copy;
 }
 
 Matrix &Matrix::operator=(Matrix &&obj) {
@@ -120,6 +127,27 @@ void Matrix::zero() {
     data[i] = 0;
   }
 }
+Matrix Matrix::sum_dim_0() {
+  Matrix out(1, this->cols());
+  for (int i = 0; i < this->cols(); i++) {
+    float sum = 0;
+    for (int j = 0; j < this->rows(); j++) {
+      sum += (*this)(j, i);
+    }
+    out(0, i) = sum;
+
+    return out;
+  }
+}
+Matrix Matrix::scale(float x) {
+  Matrix copy = (*this);
+  for (int i = 0; i < copy.rows_; i++) {
+    for (int j = 0; j < copy.cols_; j++) {
+      copy(i, j) *= x;
+    }
+  }
+  return copy;
+}
 void Matrix::print() const {
   for (int i = 0; i < (numel_); i++) {
     std::cout << data[i] << ",";
@@ -135,9 +163,9 @@ void fill(Matrix &a, float x) {
     }
   }
 }
-Matrix &add(Matrix &out, const Matrix &a, const Matrix &b) {
-  if (a.cols() == b.cols() && a.rows() == b.rows() && out.cols() == a.cols() &&
-      out.rows() == a.rows()) {
+Matrix add(const Matrix &a, const Matrix &b) {
+  if (a.cols() == b.cols() && a.rows() == b.rows()) {
+    Matrix out(a.rows(), a.cols());
     for (int i = 0; i < a.rows(); i++) {
       for (int j = 0; j < a.cols(); j++) {
         out(i, j) = a(i, j) + b(i, j);
@@ -147,14 +175,12 @@ Matrix &add(Matrix &out, const Matrix &a, const Matrix &b) {
   } else if (a.cols() != b.cols() || a.rows() != b.rows()) {
     t_error("Matrix A and Matrix B do not have the same "
             "dimensions!");
-
-  } else if (out.cols() != a.cols() || out.rows() != a.rows()) {
-    t_error("Matrix Out does not have the same dimensions as Matrix A and B!");
   }
 }
-Matrix &sub(Matrix &out, const Matrix &a, const Matrix &b) {
-  if (a.cols() == b.cols() && a.rows() == b.rows() && out.cols() == a.cols() &&
-      out.rows() == a.rows()) {
+
+Matrix sub(const Matrix &a, const Matrix &b) {
+  if (a.cols() == b.cols() && a.rows() == b.rows()) {
+    Matrix out(a.rows(), a.cols());
     for (int i = 0; i < a.rows(); i++) {
       for (int j = 0; j < a.cols(); j++) {
         out(i, j) = a(i, j) - b(i, j);
@@ -164,16 +190,12 @@ Matrix &sub(Matrix &out, const Matrix &a, const Matrix &b) {
   } else if (a.cols() != b.cols() || a.rows() != b.rows()) {
     t_error("Matrix A and Matrix B do not have the same "
             "dimensions!");
-
-  } else if (out.cols() != a.cols() || out.rows() != a.rows()) {
-    t_error("Matrix Out does not have the same dimensions as Matrix A and B!");
   }
 }
+Matrix matmul(const Matrix &a, const Matrix &b) {
+  if (a.cols() == b.rows()) {
+    Matrix out(a.rows(), b.cols());
 
-Matrix &matmul(Matrix &out, const Matrix &a, const Matrix &b) {
-  if (a.cols() == b.rows() && out.rows() == a.rows() &&
-      out.cols() == b.cols()) {
-    out.zero();
     for (int i = 0; i < a.rows(); i++) {
       for (int k = 0; k < a.cols(); k++) {
         for (int j = 0; j < b.cols(); j++) {
@@ -185,15 +207,50 @@ Matrix &matmul(Matrix &out, const Matrix &a, const Matrix &b) {
   } else if (a.cols() != b.rows()) {
 
     t_error("Cols of Matrix A dont match up with rows of Matrix B");
-  } else if (out.rows() != a.rows() || out.cols() != b.cols()) {
-    t_error("Dimensions of out do not match up with rows of a and cols of b");
+  }
+}
+Matrix broadcast_add(const Matrix &a, const Matrix &b) {
+
+  if (a.cols() == b.cols() && b.rows() == 0) {
+    Matrix out(a.rows(), a.cols());
+    for (int i = 0; i < a.rows(); i++) {
+      for (int j = 0; j < b.cols(); j++) {
+        out(i, j) = a(i, j) + b(0, j);
+      }
+    }
+    return out;
+  } else if (a.cols() == b.cols() || b.rows() == 0) {
+    t_error("dimensions are not valid for a broadcasted add");
   }
 }
 
-void relu(Matrix &a) {
+Matrix &relu(Matrix &a) {
   for (int i = 0; i < a.rows(); i++) {
     for (int j = 0; j < a.cols(); j++) {
       a(i, j) = std::max(float(0), a(i, j));
     }
+  }
+  return a;
+}
+Matrix d_relu(Matrix a) {
+  for (int i = 0; i < a.rows(); i++) {
+    for (int j = 0; j < a.cols(); j++) {
+      a(i, j) = (a(i, j) <= 0) ? 0 : 1;
+    }
+  }
+  return a;
+}
+Matrix hammard_product(const Matrix &a, const Matrix &b) {
+  if (a.cols() == b.cols() && a.rows() == b.rows()) {
+    Matrix out(a.rows(), a.cols());
+    for (int i = 0; i < a.rows(); i++) {
+      for (int j = 0; j < a.cols(); j++) {
+        out(i, j) = a(i, j) * b(i, j);
+      }
+    }
+    return out;
+  } else if (a.cols() != b.cols() || a.rows() != b.rows()) {
+    t_error("Matrix A and Matrix B do not have the same "
+            "dimensions!");
   }
 }
