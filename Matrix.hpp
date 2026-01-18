@@ -19,7 +19,9 @@ public:
   void print() const;
   int numel() const;
   void shape() const;
-  Matrix scale(float x);
+  Matrix scale_copy(const float &x) const;
+  Matrix &scale_inplace(const float &x);
+
   void copy_raw_array_and_delete(float *data_c);
 
   Matrix sum_dim_0();
@@ -30,7 +32,7 @@ private:
   int numel_;
   int row_stride;
   int col_stride;
-  float *data;
+  float *data = nullptr;
 };
 
 void fill(Matrix &a, float x);
@@ -38,6 +40,8 @@ Matrix add(const Matrix &a, const Matrix &b);
 Matrix sub(const Matrix &a, const Matrix &b);
 Matrix matmul(const Matrix &a, const Matrix &b);
 Matrix broadcast_add(const Matrix &a, const Matrix &b);
-Matrix &relu(Matrix &a);
-Matrix d_relu(Matrix a);
+Matrix &relu_inplace(Matrix &a);
+Matrix relu_copy(const Matrix &a);
+Matrix d_relu_copy(const Matrix &a);
+Matrix &d_relu_inplace(Matrix &a);
 Matrix hammard_product(const Matrix &a, const Matrix &b);

@@ -1,3 +1,4 @@
+
 #include "Arena.hpp"
 #include "Matrix.hpp"
 #include <cstdio>
@@ -111,17 +112,5 @@ Matrix read_images(std::string file, int rows, int cols) {
   return dataset;
 }
 void training_loop(model model, int batch_size) {}
-
-int main() {
-
-  Matrix a(5, 3);
-  fill(a, 5);
-  Matrix b(5, 3);
-  fill(b, 6);
-  b.T();
-  Matrix out = matmul(a, b);
-
-  out.print();
-
-  return 0;
-}
+#include <iostream>
+int main() { return 0; }
