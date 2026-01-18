@@ -83,6 +83,12 @@ Matrix::Matrix(const Matrix &other)
     data[i] = other.data[i];
   }
 }
+void Matrix::copy_raw_array_and_delete(float *data_c) {
+  for (int i = 0; i < numel_; i++) {
+    data[i] = data_c[i];
+  }
+  delete[] data_c;
+}
 
 Matrix &Matrix::operator=(const Matrix &other) {
   if (this == &other)

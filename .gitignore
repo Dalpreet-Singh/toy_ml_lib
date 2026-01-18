@@ -1,0 +1,5 @@
+venv/
+test_images.mat
+train_images.mat
+train_labels.mat
+test_labels.mat

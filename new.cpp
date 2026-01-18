@@ -1,6 +1,8 @@
 #include "Arena.hpp"
 #include "Matrix.hpp"
+#include <cstdio>
 #include <initializer_list>
+#include <stdexcept>
 #include <vector>
 class Linear {
 public:
@@ -89,7 +91,27 @@ public:
 private:
   std::vector<Linear *> layers;
 };
-void backward(model a, Matrix inputs) {}
+
+Matrix read_images(std::string file, int rows, int cols) {
+  FILE *f = fopen(file.c_str(), "rb");
+  if (!f) {
+    throw std::runtime_error("Could not open file");
+  }
+  int numel = rows * cols;
+  float *data = new float[numel];
+  Matrix dataset(rows, cols);
+  size_t read_count = fread(data, sizeof(float), numel, f);
+  fclose(f);
+  if (read_count != numel) {
+    delete[] data;
+    throw std::runtime_error(
+        "FILE DOES NOT HAVE THE EXPECTED NUMBER OF DATA ENTRIES");
+  }
+  dataset.copy_raw_array_and_delete(data);
+  return dataset;
+}
+void training_loop(model model, int batch_size) {}
+
 int main() {
 
   Matrix a(5, 3);

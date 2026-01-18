@@ -20,6 +20,7 @@ public:
   int numel() const;
   void shape() const;
   Matrix scale(float x);
+  void copy_raw_array_and_delete(float *data_c);
 
   Matrix sum_dim_0();
 
