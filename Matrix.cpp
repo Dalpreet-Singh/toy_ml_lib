@@ -13,6 +13,12 @@
 #include <source_location>
 #include <string>
 #include <vector>
+
+#include <random>
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<float> dist(0.044f, 0.107f);
+float rand_num() { return dist(gen); }
 [[noreturn]] void
 t_error(std::string error_code,
         const std::source_location location = std::source_location::current()) {
@@ -29,7 +35,7 @@ Matrix::Matrix(int r, int c)
 {
   data = new float[numel_];
   for (int i = 0; i < (numel_); i++) {
-    data[i] = 2 * i;
+    data[i] = rand_num();
   }
 };
 
@@ -53,11 +59,18 @@ void Matrix::T() {
   std::swap(rows_, cols_);
   std::swap(row_stride, col_stride);
 }
-Matrix Matrix::T_C() {
+Matrix Matrix::T_C() const {
   Matrix copy = *this;
   std::swap(copy.rows_, copy.cols_);
   std::swap(copy.row_stride, copy.col_stride);
   return copy;
+}
+void Matrix::row_copy(const Matrix &vec, int row_start) {
+  for (int i = row_start; i < row_start + vec.rows(); i++) {
+    for (int j = 0; j < cols_; j++) {
+      (*this)(i, j) = vec(i - row_start, j);
+    }
+  }
 }
 
 Matrix &Matrix::operator=(Matrix &&obj) {
@@ -98,6 +111,15 @@ void Matrix::copy_raw_array_and_delete(float *data_c) {
     data[i] = data_c[i];
   }
   delete[] data_c;
+}
+Matrix Matrix::slice_rows(int row_start, int num_rows) {
+  Matrix out(num_rows, cols_);
+  for (int i = row_start; i < row_start + num_rows; i++) {
+    for (int j = 0; j < cols_; j++) {
+      out(i - row_start, j) = (*this)(i, j);
+    }
+  }
+  return out;
 }
 
 Matrix &Matrix::operator=(const Matrix &other) {
@@ -143,7 +165,7 @@ void Matrix::zero() {
     data[i] = 0;
   }
 }
-Matrix Matrix::sum_dim_0() {
+Matrix Matrix::sum_dim_0_copy() const {
   Matrix out(1, this->cols());
   for (int i = 0; i < this->cols(); i++) {
     float sum = 0;
@@ -174,12 +196,14 @@ Matrix &Matrix::scale_inplace(const float &x) {
 }
 
 void Matrix::print() const {
+  std::cout << "(" << std::endl;
   for (int i = 0; i < (rows_); i++) {
     for (int j = 0; j < cols_; j++) {
       std::cout << (*this)(i, j) << ",";
     }
     std::cout << std::endl;
   }
+  std::cout << ")" << std::endl;
 }
 int Matrix::numel() const { return numel_; }
 void Matrix::shape() const { std::cout << "(" << rows_ << "," << cols_ << ")"; }
@@ -225,6 +249,7 @@ Matrix sub(const Matrix &a, const Matrix &b) {
 Matrix matmul(const Matrix &a, const Matrix &b) {
   if (a.cols() == b.rows()) {
     Matrix out(a.rows(), b.cols());
+    out.zero();
 
     for (int i = 0; i < a.rows(); i++) {
       for (int k = 0; k < a.cols(); k++) {
@@ -304,4 +329,21 @@ Matrix hammard_product(const Matrix &a, const Matrix &b) {
             "dimensions!");
     return Matrix(0, 0);
   }
+}
+Matrix &softmax(Matrix &a) {
+  for (int i = 0; i < a.rows(); i++) {
+    float max_val = a(i, 0);
+    for (int j = 0; j < a.cols(); j++) {
+      max_val = std::max(a(i, j), max_val);
+    }
+    float sum = 0;
+    for (int j = 0; j < a.cols(); j++) {
+      a(i, j) = exp(a(i, j) - max_val);
+      sum += a(i, j);
+    }
+    for (int j = 0; j < a.cols(); j++) {
+      a(i, j) /= sum;
+    }
+  }
+  return a;
 }

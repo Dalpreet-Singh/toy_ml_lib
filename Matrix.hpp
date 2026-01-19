@@ -1,11 +1,11 @@
 
-class alignas(16) Matrix {
+class Matrix {
 public:
   Matrix(int r, int c);
 
   Matrix(Matrix &&obj);
   void T();
-  Matrix T_C();
+  Matrix T_C() const;
 
   Matrix &operator=(Matrix &&obj);
   ~Matrix();
@@ -23,8 +23,9 @@ public:
   Matrix &scale_inplace(const float &x);
 
   void copy_raw_array_and_delete(float *data_c);
-
-  Matrix sum_dim_0();
+  Matrix slice_rows(int row_start, int num_rows);
+  Matrix sum_dim_0_copy() const;
+  void row_copy(const Matrix &vec, int row_start);
 
 private:
   int rows_;
@@ -45,3 +46,4 @@ Matrix relu_copy(const Matrix &a);
 Matrix d_relu_copy(const Matrix &a);
 Matrix &d_relu_inplace(Matrix &a);
 Matrix hammard_product(const Matrix &a, const Matrix &b);
+Matrix &softmax(Matrix &a);
