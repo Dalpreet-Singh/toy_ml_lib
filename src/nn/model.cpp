@@ -135,8 +135,7 @@ void training(model &a, std::string train_file, std::string train_label_file,
   Matrix batch_labels(batch_size, 10);
   for (int i = 0; i < epochs; i++) {
     for (int i = 0; i < steps; i++) {
-      std::cout << "batch_size:" << batch_size << std::endl;
-      std::cout << i << std::endl;
+
       Matrix inputs = dataset.slice_rows(i * batch_size, batch_size);
       batch_labels = labels.slice_rows(i * batch_size, batch_size);
       Matrix output = a.forward(inputs);
