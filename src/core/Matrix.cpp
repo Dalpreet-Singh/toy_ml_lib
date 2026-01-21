@@ -1,33 +1,20 @@
 
 
 #include <iostream>
-#include <memory>
-#include <new>
 
 #include "Matrix.hpp"
+#include "utility.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
+#include <random>
 #include <source_location>
 #include <string>
-#include <vector>
-
-#include <random>
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<float> dist(0.044f, 0.107f);
 float rand_num() { return dist(gen); }
-[[noreturn]] void
-t_error(std::string error_code,
-        const std::source_location location = std::source_location::current()) {
-  std::cerr << "Error: " << error_code << "\n"
-            << "File: " << location.file_name() << "\n"
-            << "Line: " << location.line() << "\n"
-            << "Function: " << location.function_name() << std::endl;
-  std::exit(EXIT_FAILURE);
-}
 
 Matrix::Matrix(int r, int c)
     : rows_(r), cols_(c), row_stride(c), col_stride(1), numel_(r * c)
@@ -56,20 +43,31 @@ Matrix::Matrix(Matrix &&obj) {
 }
 void Matrix::T() {
 
+  if (!data) {
+    t_error("Transpose called on invalid matrix");
+  }
   std::swap(rows_, cols_);
   std::swap(row_stride, col_stride);
 }
 Matrix Matrix::T_C() const {
+
+  if (!data) {
+    t_error("Transpose called on invalid matrix");
+  }
   Matrix copy = *this;
   std::swap(copy.rows_, copy.cols_);
   std::swap(copy.row_stride, copy.col_stride);
   return copy;
 }
 void Matrix::row_copy(const Matrix &vec, int row_start) {
-  for (int i = row_start; i < row_start + vec.rows(); i++) {
-    for (int j = 0; j < cols_; j++) {
-      (*this)(i, j) = vec(i - row_start, j);
+  if (vec.cols_ == cols_ && vec.rows() + row_start < rows_ && row_start >= 0)
+    for (int i = row_start; i < row_start + vec.rows(); i++) {
+      for (int j = 0; j < cols_; j++) {
+        (*this)(i, j) = vec(i - row_start, j);
+      }
     }
+  else {
+    t_error("Invalid row_start or invalid copy matrix dimensions");
   }
 }
 
@@ -113,13 +111,17 @@ void Matrix::copy_raw_array_and_delete(float *data_c) {
   delete[] data_c;
 }
 Matrix Matrix::slice_rows(int row_start, int num_rows) {
-  Matrix out(num_rows, cols_);
-  for (int i = row_start; i < row_start + num_rows; i++) {
-    for (int j = 0; j < cols_; j++) {
-      out(i - row_start, j) = (*this)(i, j);
+  if (row_start >= 0 && row_start + num_rows <= rows_) {
+    Matrix out(num_rows, cols_);
+    for (int i = row_start; i < row_start + num_rows; i++) {
+      for (int j = 0; j < cols_; j++) {
+        out(i - row_start, j) = (*this)(i, j);
+      }
     }
+    return out;
+  } else {
+    t_error("Row_start and num_rows are invalid for row slicing");
   }
-  return out;
 }
 
 Matrix &Matrix::operator=(const Matrix &other) {
@@ -166,15 +168,19 @@ void Matrix::zero() {
   }
 }
 Matrix Matrix::sum_dim_0_copy() const {
-  Matrix out(1, this->cols());
-  for (int i = 0; i < this->cols(); i++) {
-    float sum = 0;
-    for (int j = 0; j < this->rows(); j++) {
-      sum += (*this)(j, i);
+  if (rows_ > 0 && cols_ > 0) {
+    Matrix out(1, this->cols());
+    for (int i = 0; i < this->cols(); i++) {
+      float sum = 0;
+      for (int j = 0; j < this->rows(); j++) {
+        sum += (*this)(j, i);
+      }
+      out(0, i) = sum;
     }
-    out(0, i) = sum;
+    return out;
+  } else {
+    t_error("Doing a summing op on a matrix with 0 numel is undefined");
   }
-  return out;
 }
 Matrix Matrix::scale_copy(const float &x) const {
   Matrix copy = (*this);
@@ -331,6 +337,9 @@ Matrix hammard_product(const Matrix &a, const Matrix &b) {
   }
 }
 Matrix &softmax(Matrix &a) {
+  if (a.cols() <= 0) {
+    t_error("You must have atleast 1 col for softmax");
+  }
   for (int i = 0; i < a.rows(); i++) {
     float max_val = a(i, 0);
     for (int j = 0; j < a.cols(); j++) {

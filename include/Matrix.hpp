@@ -1,4 +1,4 @@
-
+#pragma once
 class Matrix {
 public:
   Matrix(int r, int c);
