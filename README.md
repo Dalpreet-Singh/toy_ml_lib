@@ -19,11 +19,12 @@ A small toy machine learning library written in C++, built primarily as a learni
 
 ## Getting Started
 
+
 ### Clone the Repository
 
 ```bash
-git clone <repo-url>
-cd <repo-name>
+git clone https://github.com/Dalpreet-Singh/toy_ml_lib.git
+cd toy_ml_lib
 ```
 
 ### Prepare Your Dataset
@@ -37,7 +38,7 @@ An example CIFAR-10 loader is already provided.
 
 ### Create Your Model
 
-* Define an MLP by initializing a `Model` class with instances of `Linear` classes
+* Define an MLP by initializing a `Model` class with instances of `Linear` classes(a standard CIFAR-10 model is already provided in main.cpp)
 * The activation function is currently hardcoded to ReLU
 
 ### Train the Model
