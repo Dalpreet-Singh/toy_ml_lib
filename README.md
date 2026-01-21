@@ -37,7 +37,7 @@ An example CIFAR-10 loader is already provided.
 
 ### Create Your Model
 
-* Define an MLP by initalizing a `model` class with instances of `Linear` classes
+* Define an MLP by initializing a `Model` class with instances of `Linear` classes
 * The activation function is currently hardcoded to ReLU
 
 ### Train the Model
@@ -73,10 +73,14 @@ add_executable(train YOUR_FILE.cpp)
 ### Build the Project
 
 ```bash
-mkdir build
-cd build
-cmake ..
-make
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Run the Executable
+
+```bash
+./build/train
 ```
 
 ## Notes
