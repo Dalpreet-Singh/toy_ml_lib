@@ -1,5 +1,5 @@
 venv/
-test_images.mat
-train_images.mat
-train_labels.mat
-test_labels.mat
+test_images.bin
+train_images.bin
+train_labels.bin
+test_labels.bin

@@ -27,7 +27,7 @@ train_images = train_images.reshape(-1, 3072)
 test_images = test_images.reshape(-1, 3072)
 
 
-train_images.tofile("/data/train_images.bin")
+train_images.tofile("train_images.bin")
 train_labels.tofile("train_labels.bin")
 test_images.tofile("test_images.bin")
 test_labels.tofile("test_labels.bin")

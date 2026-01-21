@@ -143,7 +143,8 @@ void training(model &a, std::string train_file, std::string train_label_file,
 
       a.backward(batch_labels, output);
       a.step(1e-4);
-      std::cout << cross_entropy_loss(batch_labels, output) << std::endl;
+      std::cout << "step:" << cross_entropy_loss(batch_labels, output)
+                << std::endl;
     }
   }
   auto end = std::chrono::steady_clock::now();
