@@ -155,3 +155,31 @@ void training(model &a, std::string train_file, std::string train_label_file,
   std::cout << "Time elapsed: " << duration.count() << " milliseconds"
             << std::endl;
 }
+void eval(model &a, std::string train_file, std::string train_label_file,
+          int batch_size, int rows, int cols) {
+  auto start = std::chrono::steady_clock::now();
+
+  int steps = rows / batch_size;
+  Matrix dataset = read_data(train_file, rows, cols);
+  Matrix labels = label_processing(train_label_file, rows);
+  Matrix batch_labels(batch_size, 10);
+
+  for (int i = 0; i < steps; i++) {
+
+    Matrix inputs = dataset.slice_rows(i * batch_size, batch_size);
+    batch_labels = labels.slice_rows(i * batch_size, batch_size);
+    Matrix output = a.forward(inputs);
+    softmax(output);
+
+    std::cout << "eval_loss:" << cross_entropy_loss(batch_labels, output)
+              << std::endl;
+  }
+
+  auto end = std::chrono::steady_clock::now();
+
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+  std::cout << "Time elapsed: " << duration.count() << " milliseconds"
+            << std::endl;
+}

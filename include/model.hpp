@@ -41,3 +41,5 @@ private:
 };
 void training(model &a, std::string train_file, std::string train_label_file,
               int batch_size, int rows, int cols, int epochs);
+void eval(model &a, std::string test_file, std::string test_label_file,
+          int batch_size, int rows, int cols);
