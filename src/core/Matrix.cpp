@@ -20,10 +20,7 @@ Matrix::Matrix(int r, int c)
     : rows_(r), cols_(c), row_stride(c), col_stride(1), numel_(r * c)
 
 {
-  data = new float[numel_];
-  for (int i = 0; i < (numel_); i++) {
-    data[i] = rand_num();
-  }
+  data = std::vector<float>(numel_);
 };
 
 Matrix::Matrix(Matrix &&obj) {
@@ -33,8 +30,7 @@ Matrix::Matrix(Matrix &&obj) {
   col_stride = obj.col_stride;
   row_stride = obj.row_stride;
 
-  data = obj.data;
-  obj.data = nullptr;
+  data = std::move(obj.data);
   obj.rows_ = 0;
   obj.cols_ = 0;
   obj.numel_ = 0;
@@ -43,7 +39,7 @@ Matrix::Matrix(Matrix &&obj) {
 }
 void Matrix::T() {
 
-  if (!data) {
+  if (data.empty()) {
     t_error("Transpose called on invalid matrix");
   }
   std::swap(rows_, cols_);
@@ -51,7 +47,7 @@ void Matrix::T() {
 }
 Matrix Matrix::T_C() const {
 
-  if (!data) {
+  if (data.empty()) {
     t_error("Transpose called on invalid matrix");
   }
   Matrix copy = *this;
@@ -76,16 +72,13 @@ Matrix &Matrix::operator=(Matrix &&obj) {
   if (this == &obj)
     return *this;
 
-  delete[] data;
-
   rows_ = obj.rows_;
   cols_ = obj.cols_;
   numel_ = obj.numel_;
-  data = obj.data;
+  data = std::move(obj.data);
 
   col_stride = obj.col_stride;
   row_stride = obj.row_stride;
-  obj.data = nullptr;
   obj.cols_ = 0;
   obj.numel_ = 0;
   obj.col_stride = 0;
@@ -94,12 +87,12 @@ Matrix &Matrix::operator=(Matrix &&obj) {
   return *this;
 }
 
-Matrix::~Matrix() { delete[] data; };
+Matrix::~Matrix() = default;
 Matrix::Matrix(const Matrix &other)
     : rows_(other.rows_), cols_(other.cols_), numel_(other.numel_),
       row_stride(other.row_stride), col_stride(other.col_stride) {
 
-  data = new float[numel_];
+  data = std::vector<float>(numel_);
   for (int i = 0; i < numel_; i++) {
     data[i] = other.data[i];
   }
@@ -130,19 +123,14 @@ Matrix &Matrix::operator=(const Matrix &other) {
 
   if (rows_ != other.rows_ || cols_ != other.cols_) {
 
-    float *new_data = new float[other.numel_];
-    delete[] data;
-    data = new_data;
     rows_ = other.rows_;
     cols_ = other.cols_;
     numel_ = other.numel_;
   }
+  data = other.data;
   col_stride = other.col_stride;
   row_stride = other.row_stride;
 
-  for (int i = 0; i < numel_; i++) {
-    data[i] = other.data[i];
-  }
   return *this;
 }
 

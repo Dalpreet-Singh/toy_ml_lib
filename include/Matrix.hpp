@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 class Matrix {
 public:
   Matrix(int r, int c);
@@ -33,7 +34,7 @@ private:
   int numel_;
   int row_stride;
   int col_stride;
-  float *data = nullptr;
+  std::vector<float> data;
 };
 
 void fill(Matrix &a, float x);
