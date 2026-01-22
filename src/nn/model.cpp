@@ -72,6 +72,7 @@ Matrix Linear::get_grad_biases() const { return grad_biases; }
 Matrix &Linear::get_biases() { return bias; }
 
 model::model(std::initializer_list<Linear *> list) {
+  // MODEL MUST BE INITALIZED WITH STACK POINTERS
   if (list.size() <= 0) {
     t_error("you must have atleast 1 layer in the model");
   }
@@ -80,11 +81,7 @@ model::model(std::initializer_list<Linear *> list) {
     layers.push_back(layer);
   }
 }
-model::~model() {
-  for (Linear *layer : layers) {
-    delete layer;
-  }
-}
+model::~model() = default;
 Matrix model::forward(const Matrix &input) {
   Matrix place_h = input;
   for (Linear *layer : layers) {
