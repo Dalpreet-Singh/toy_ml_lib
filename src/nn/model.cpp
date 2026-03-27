@@ -29,7 +29,8 @@ Matrix Linear::forward(const Matrix &input) {
   // weight shape (o,i)
   // bias shape (o)
 
-  Matrix output = broadcast_add((matmul(input, weights.T_C())), bias);
+  Matrix output =
+      broadcast_add(input.matmul(weights, CblasNoTrans, CblasTrans), bias);
   if (order != -1) {
     relu_inplace(output);
   }
@@ -61,8 +62,8 @@ Matrix Linear::backward(const Matrix &grad_output) {
   }
   // inputs(b,i)
   grad_biases = grad_output.sum_dim_0_copy();
-  grad_weights = matmul(grad_output.T_C(), inputs);
-  return matmul(grad_output, weights);
+  grad_weights = grad_output.matmul(inputs, CblasTrans, CblasNoTrans);
+  return grad_output.matmul(weights, CblasNoTrans, CblasNoTrans);
 }
 int Linear::get_order() { return order; }
 const Matrix &Linear::get_outputs() const { return outputs; }

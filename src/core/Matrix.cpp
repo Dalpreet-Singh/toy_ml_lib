@@ -149,6 +149,20 @@ const float &Matrix::operator()(int r, int c) const {
 }
 
 int Matrix::rows() const { return rows_; }
+
+Matrix Matrix::matmul(const Matrix &B, CBLAS_TRANSPOSE transA,
+                      CBLAS_TRANSPOSE transB) const {
+  int M = (transA == CblasNoTrans) ? this->rows() : this->cols();
+  int K = (transA == CblasNoTrans) ? this->cols() : this->rows();
+  int N = (transB == CblasNoTrans) ? B.cols() : B.rows();
+  Matrix C(M, N);
+  int lda = this->cols();
+  int ldb = B.cols();
+  int ldc = N;
+  cblas_sgemm(CblasRowMajor, transA, transB, M, N, K, 1.0f, this->data.data(),
+              lda, B.data.data(), ldb, 0.0f, C.data.data(), ldc);
+  return C;
+}
 int Matrix::cols() const { return cols_; }
 void Matrix::zero() {
   for (int i = 0; i < (numel_); i++) {
@@ -240,25 +254,7 @@ Matrix sub(const Matrix &a, const Matrix &b) {
     return Matrix(0, 0);
   }
 }
-Matrix matmul(const Matrix &a, const Matrix &b) {
-  if (a.cols() == b.rows()) {
-    Matrix out(a.rows(), b.cols());
-    out.zero();
 
-    for (int i = 0; i < a.rows(); i++) {
-      for (int k = 0; k < a.cols(); k++) {
-        for (int j = 0; j < b.cols(); j++) {
-          out(i, j) += a(i, k) * b(k, j);
-        }
-      }
-    }
-    return out;
-  } else {
-
-    t_error("Cols of Matrix A dont match up with rows of Matrix B");
-    return Matrix(0, 0);
-  }
-}
 Matrix broadcast_add(const Matrix &a, const Matrix &b) {
 
   if (a.cols() == b.cols() && b.rows() == 1) {

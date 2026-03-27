@@ -1,4 +1,5 @@
 #pragma once
+#include <cblas.h>
 #include <vector>
 class Matrix {
 public:
@@ -16,6 +17,8 @@ public:
   const float &operator()(int r, int c) const;
   int rows() const;
   int cols() const;
+  Matrix matmul(const Matrix &B, CBLAS_TRANSPOSE transA,
+                CBLAS_TRANSPOSE transB) const;
   void zero();
   void print() const;
   int numel() const;
@@ -40,7 +43,6 @@ private:
 void fill(Matrix &a, float x);
 Matrix add(const Matrix &a, const Matrix &b);
 Matrix sub(const Matrix &a, const Matrix &b);
-Matrix matmul(const Matrix &a, const Matrix &b);
 Matrix broadcast_add(const Matrix &a, const Matrix &b);
 Matrix &relu_inplace(Matrix &a);
 Matrix relu_copy(const Matrix &a);

@@ -1,6 +1,7 @@
 
 
 #include "utility.hpp"
+#include <cmath>
 [[noreturn]] void t_error(std::string error_code,
                           const std::source_location location) {
   std::cerr << "Error: " << error_code << "\n"
